@@ -1,0 +1,94 @@
+﻿@model EndPointsSettingsModel;
+@{
+    ViewData["Title"] = "Resultados de la encuesta";
+
+    ViewData["FunctionUrl"] = Model.FunctionURL;
+}
+
+<h2 class="title">@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div id="waitingresults">
+            Encuesta enviada correctamente.<br />Espere a recibir nuevos datos.....
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div id="results" class="col-md-4">
+        Hasta el momento el resultado de la encuesta, es el siguiente....<br/>
+        <span class="green">
+            <div id="txtpositiveresults"></div>
+        </span>
+        <span class="red">
+            <div id="txtnegativeresults"></div>
+        </span>
+    </div>
+</div>
+
+
+
+@section Scripts{
+    <script>
+        window.onload = function () {
+            document.getElementById('waitingresults').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+        }
+    </script>
+
+    <script>                        
+        var apiBaseUrl = '@ViewData["FunctionUrl"]';
+
+        const data = {
+            newMessage: '',
+            messages: []
+        };
+
+        getConnectionInfo().then(info => {
+            // make compatible with old and new SignalRConnectionInfo
+            info.accessToken = info.accessToken || info.accessKey;
+            info.url = info.url || info.endpoint;
+
+            const options = {
+                accessTokenFactory: () => info.accessToken
+            };
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(info.url, options)
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            connection.on('votingresults', votingresults)
+            connection.onclose(() => console.log('disconnected'));
+            console.log('connecting...');
+
+            connection.start()
+                .then(() => console.log('connected!'))
+                .catch(console.error);
+        }).catch(alert);
+
+        function getConnectionInfo() {
+            return axios.post(`${apiBaseUrl}/api/negotiatevotingresults`, null, getAxiosConfig())
+            .then(resp => resp.data);
+        }
+
+        function getAxiosConfig() {
+            const config = {
+                headers: {}
+            };
+            return config;
+        }
+
+        function votingresults(msg) {
+            var obj = JSON.parse(msg);
+            document.getElementById("txtpositiveresults").innerHTML = obj.PositiveVote;
+            document.getElementById("txtnegativeresults").innerHTML = obj.NegativeVote;
+
+            document.getElementById('waitingresults').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+        }
+
+    </script>
+}
+

@@ -1,0 +1,43 @@
+﻿h1.txt-header{
+    text-align:left;
+}
+
+div.image-workarea {
+    border: 0px;
+    border-style: solid;
+    padding: 10px;
+    width: 100%;
+}
+
+div.padding {
+    padding-left: 80px;
+}
+
+div.image-container{
+    display:inline;
+}
+
+img.img-properties {
+    width: 200px;
+    height: 200px;
+    margin-right: 100px;
+}
+
+div.button-workarea {
+    border: 0px;
+    border-style: solid;
+    padding: 10px;
+    width: 100%;
+}
+
+div.button-container {
+    display: inline;
+}
+
+button.style {
+    
+}
+
+#texto-confirmacion {
+    display: inline;
+}

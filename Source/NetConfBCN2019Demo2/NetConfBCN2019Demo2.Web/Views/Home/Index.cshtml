@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@using (Html.BeginForm("Vote", "Home", FormMethod.Post))
+{
+    <section>
+        <div class="workarea">
+            <h1 class="txt-header">Contesta a la encuesta....¿tienes coche?</h1>
+        </div>
+    </section>
+    <section>
+        <form id="account" method="post" novalidate="novalidate">
+            <div class="image-workarea">
+                <div class="image-container">
+                    <img src="~/images/positive.png" class="img-properties" onclick="Action(true)" />
+                </div>
+                <div class="image-container">
+                    <img src="~/images/negative.png" class="img-properties" onclick="Action(false)" />
+                </div>
+            </div>
+            <div class="button-workarea">
+                <input type="hidden" id="VoteRaw" name="VoteRaw">
+
+                <div id="pdte-confirmacion" class="button-container">
+                    ¿Aún no te has decidido por tu respuesta?????
+                </div>
+
+                <div id="confirmacion" class="button-container">
+                    <div id="texto-confirmacion"></div> <button type="submit" class="btn btn-default style">Vota</button>
+                </div>
+            </div>
+        </form>
+    </section>
+}
+
+
+@section Scripts{
+    <script>
+        function Action(msg) {
+            document.getElementById("VoteRaw").value = msg;
+
+            var respuesta = (msg == true) ? 'SI' : 'NO';
+            var texto = 'Has elegido ' + respuesta + '... ¿Estás seguro? ...';
+
+            document.getElementById('texto-confirmacion').innerHTML = texto;
+
+            document.getElementById('pdte-confirmacion').style.display = 'none';
+            document.getElementById('confirmacion').style.display = 'block';
+        }
+        
+        window.onload = function () {
+            document.getElementById('pdte-confirmacion').style.display = 'block';
+            document.getElementById('confirmacion').style.display = 'none';
+        }
+    </script>
+}

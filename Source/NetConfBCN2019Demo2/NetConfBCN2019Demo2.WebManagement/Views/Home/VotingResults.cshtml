@@ -1,0 +1,71 @@
+﻿@model EndPointsSettingsModel;
+@{
+    ViewData["Title"] = "Web Management";
+
+    ViewData["FunctionUrl"] = Model.FunctionURL;
+}
+
+<div id="app" class="container">
+    <h3>Receptor de mensajes: votingresults</h3>
+
+    <div v-if="ready">
+        <div id="txtvotingresults" border="1">
+            Los mensajes (votingresults) recibidos son:
+            <br />
+        </div>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+        const apiBaseUrl = '@ViewData["FunctionUrl"]';
+
+        const data = {
+            newMessage: '',
+            messages: []
+        };
+
+        getConnectionInfo().then(info => {
+            // make compatible with old and new SignalRConnectionInfo
+            info.accessToken = info.accessToken || info.accessKey;
+            info.url = info.url || info.endpoint;
+
+            const options = {
+                accessTokenFactory: () => info.accessToken
+            };
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(info.url, options)
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            connection.on('votingresults', votingresults)
+            connection.onclose(() => console.log('disconnected'));
+            console.log('connecting...');
+
+            connection.start()
+                .then(() => console.log('connected!'))
+                .catch(console.error);
+        }).catch(alert);
+
+        function getConnectionInfo() {
+            return axios.post(`${apiBaseUrl}/api/negotiatevotingresults`, null, getAxiosConfig())
+                .then(resp => resp.data);
+        }
+
+        function getAxiosConfig() {
+            const config = {
+                headers: {}
+            };
+            return config;
+        }
+
+        function votingresults(msg) {
+            var linebreak = document.createElement("br");
+            var text = document.createTextNode(msg);
+            document.getElementById("txtvotingresults").appendChild(linebreak);
+            document.getElementById("txtvotingresults").appendChild(text);
+        }
+    </script>
+}

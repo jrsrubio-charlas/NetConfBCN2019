@@ -1,0 +1,71 @@
+﻿@{
+    ViewData["Title"] = "Web Management";    
+}
+
+
+<div id="app" class="container">
+    <h3>Receptor de mensajes: voteraw</h3>
+    <div id="status"></div>
+    <div v-if="ready">
+        <div id="txtvoteraw" border="1">
+            Los mensajes (voteraw) recibidos son:
+            <br />
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts{
+    <script>
+        const apiBaseUrl = '@ViewData["FunctionUrl"]';
+
+        const data = {
+            newMessage: '',
+            messages: []
+        };
+
+        getConnectionInfo().then(info => {
+            // make compatible with old and new SignalRConnectionInfo
+            info.accessToken = info.accessToken || info.accessKey;
+            info.url = info.url || info.endpoint;
+
+            const options = {
+                accessTokenFactory: () => info.accessToken
+            };
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(info.url, options)
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            connection.on('newvoteraw', newvoteraw);
+            connection.onclose(() => console.log('disconnected'));
+            console.log('connecting...');
+
+            connection.start()
+                .then(() => console.log('connected!'))
+                .catch(console.error);
+        }).catch(alert);
+
+        function getAxiosConfig() {
+            const config = {
+                headers: {}
+            };
+            return config;
+        }
+
+        function getConnectionInfo() {
+            return axios.post(`${apiBaseUrl}/api/negotiatevoteraw`, null, getAxiosConfig())
+                .then(resp => resp.data);
+        }
+
+        function newvoteraw(msg) {
+            var linebreak = document.createElement("br");
+            var text = document.createTextNode(msg);
+            document.getElementById("txtvoteraw").appendChild(linebreak);
+            document.getElementById("txtvoteraw").appendChild(text);
+        }
+
+    </script>
+}
